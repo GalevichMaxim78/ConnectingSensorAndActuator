@@ -9,9 +9,10 @@
 #define ADC_CHANNEL ADC_CHANNEL_5
 #define RELEY_PIN 15
 #define ADC_BITWIDTH ADC_BITWIDTH_12
+#define INPUT_VOLTAGE 3300
 
-#define THRESHOLD_DARK 0.4
-#define THRESHOLD_LIGHT 0.6
+#define THRESHOLD_DARK 0.43
+#define THRESHOLD_LIGHT 0.57
 
 TaskHandle_t ADCTaskHandle = NULL;
 
@@ -26,28 +27,31 @@ void ADCTask(void *arg)
 
    float calc_voltage;
    float error;
+   uint8_t state = 0;
 
    while(1)
    {
        potentiometr_read = ADC_ReadDigital(adc_handle, ADC_CHANNEL);
        printf("ADC_PIN (GPIO 1) ADC input from LDR: %d \n", potentiometr_read);
 
-       calc_voltage = (float)potentiometr_read / ADC_GetMaxDigital(ADC_BITWIDTH) * 3.3 *1000;
-       printf(" Calculated voltage: %.0f \n", calc_voltage);
+       calc_voltage = (float)potentiometr_read / ADC_GetMaxDigital(ADC_BITWIDTH) * INPUT_VOLTAGE;
+       printf(" Calculated voltage in milivolts: %.0f \n", calc_voltage);
 
-       if(potentiometr_read < (ADC_GetMaxDigital(ADC_BITWIDTH) * THRESHOLD_DARK))
-       {
-            printf(" turn on LED\n");
-            gpio_set_level(RELEY_PIN, 1);
-       }
-       else if (potentiometr_read > (ADC_GetMaxDigital(ADC_BITWIDTH) * THRESHOLD_LIGHT))
-       {
-            printf(" turn off LED\n");
-            gpio_set_level(RELEY_PIN, 0);
-       }
-
-       potentiometr_output = ADC_DigitalToVoltage(cali_handle, potentiometr_read);
+       potentiometr_output = ADC_GetCalibratedVoltage(cali_handle, potentiometr_read);
        printf(" Milivolt output after calibration - Channel %d %d \n", ADC_CHANNEL, potentiometr_output);
+
+       if(potentiometr_output < (INPUT_VOLTAGE * THRESHOLD_DARK) && !state)
+       {
+            state = 1;
+            printf(" turn on LED\n");
+            gpio_set_level(RELEY_PIN, state);
+       }
+       else if (potentiometr_output > (INPUT_VOLTAGE * THRESHOLD_LIGHT) && state)
+       {
+            state = 0;
+            printf(" turn off LED\n");
+            gpio_set_level(RELEY_PIN, state);
+       }
 
        error = fabsf(calc_voltage - potentiometr_output) / potentiometr_output * 100;
        printf(" Error %.2f%% \n", error);

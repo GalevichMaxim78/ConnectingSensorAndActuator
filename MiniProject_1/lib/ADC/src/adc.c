@@ -55,7 +55,7 @@ int ADC_GetMaxDigital(adc_bitwidth_t bitwidth)
     }
 }
 
-int ADC_DigitalToVoltage(adc_cali_handle_t cali_handle, int value)
+int ADC_GetCalibratedVoltage(adc_cali_handle_t cali_handle, int value)
 {
     int voltage;
     ESP_ERROR_CHECK(adc_cali_raw_to_voltage(cali_handle, value, &voltage));

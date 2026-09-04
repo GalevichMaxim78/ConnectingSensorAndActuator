@@ -7,6 +7,6 @@ int ADC_ReadDigital(adc_oneshot_unit_handle_t handle, adc_channel_t channel);
 
 int ADC_GetMaxDigital(adc_bitwidth_t bitwidth);
 
-int ADC_DigitalToVoltage(adc_cali_handle_t cali_handle, int value);
+int ADC_GetCalibratedVoltage(adc_cali_handle_t cali_handle, int value);
 
 void ADC_Reset(adc_oneshot_unit_handle_t handle, adc_cali_handle_t* cali_handle);
