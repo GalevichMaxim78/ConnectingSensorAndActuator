@@ -16,7 +16,6 @@
 #define THRESHOLD_LIGHT 0.57
 
 TaskHandle_t ADCTaskHandle = NULL;
-const char* text = "Supermax78";
 
 void ADCTask(void *arg)
 {
